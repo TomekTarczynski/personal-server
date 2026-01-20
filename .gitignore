@@ -1,3 +1,16 @@
+# Terraform
+**/.terraform/
+**/.terraform.lock.hcl
+**/terraform.tfstate
+**/terraform.tfstate.*
+**/crash.log
+**/crash.*.log
+
+# Terraform vars (often contain secrets or machine-specific values)
+**/terraform.tfvars
+**/*.tfvars
+**/*.tfvars.json
+
+# Secrets / env files
 **/.env
-**/*tfstate*
-**/backups/
+**/.env.*
