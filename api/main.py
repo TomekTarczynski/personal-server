@@ -9,7 +9,7 @@ def healthz():
 
 @app.get("/hello")
 def hello():
-    return("message": "hello from fastapi")
+    return {"message": "hello from fastapi"}
 
 if __name__ == "__main__":
     import uvicorn
