@@ -55,7 +55,7 @@ resource "null_resource" "deploy" {
   provisioner "remote-exec" {
     inline = [
       "chmod 700 /tmp/deploy.sh",
-      "REPO_URL='https://${var.github_repo}' GITHUB_PAT='${var.github_pat}' DEPLOY_DIR='/opt/personal-server' COMPOSE_DIR='/opt/personal-server/deploy/nginx' bash /tmp/deploy.sh",
+      "REPO_URL='https://${var.github_repo}' GITHUB_PAT='${var.github_pat}' DEPLOY_DIR='/opt/personal-server' COMPOSE_DIR='/opt/personal-server/deploy' bash /tmp/deploy.sh",
       "rm -rf /tmp/deploy.sh"
     ]
   }
