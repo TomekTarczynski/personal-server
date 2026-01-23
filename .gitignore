@@ -13,3 +13,7 @@
 # Secrets / env files
 **/.env
 **/.env.*
+
+# db
+deploy/data/
+*.db

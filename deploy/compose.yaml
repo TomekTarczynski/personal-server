@@ -15,6 +15,12 @@ services:
       context: ../api
     environment:
       - PORT=8000
+      - DB_PATH=/data/app/db
+    volumes:
+      - appdata:/data
     expose:
       - "8000"
     restart: unless-stopped
+
+  volumes:
+    appdata:
