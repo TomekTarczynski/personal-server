@@ -15,7 +15,7 @@ services:
       context: ../api
     environment:
       - PORT=8000
-      - DB_PATH="/data/sqlite.db"
+      - DB_PATH=/data/sqlite.db
     volumes:
       - appdata:/data
     expose:
