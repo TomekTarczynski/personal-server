@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>KV GUI</title>
+    <style>
+      body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 24px; }
+      .row { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
+      label { font-weight: 600; }
+      input[type="text"] { padding: 8px; width: 360px; max-width: 100%; }
+      textarea { width: 100%; height: 220px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; padding: 10px; }
+      button { padding: 10px 14px; cursor: pointer; }
+      .btns { display: flex; gap: 10px; flex-wrap: wrap; }
+      pre { background: #0b0f14; color: #d6deeb; padding: 12px; overflow: auto; border-radius: 6px; }
+      .hint { color: #444; }
+      .err { color: #b00020; font-weight: 600; }
+      .ok { color: #0a7a0a; font-weight: 600; }
+      .card { border: 1px solid #ddd; border-radius: 8px; padding: 16px; margin-top: 16px; }
+    </style>
+  </head>
+  <body>
+    <h1>KV GUI</h1>
+    <p class="hint">Calls your API via <code>/api/kv/&lt;key&gt;</code>.</p>
+
+    <div class="card">
+      <div class="row">
+        <div>
+          <label for="key">Key</label><br />
+          <input id="key" type="text" placeholder="e.g. test" />
+        </div>
+
+        <div class="btns">
+          <button id="btnGet">GET</button>
+          <button id="btnPut">PUT</button>
+          <button id="btnDel">DELETE</button>
+        </div>
+      </div>
+
+      <div style="margin-top: 14px;">
+        <label for="value">Value (JSON object)</label>
+        <textarea id="value" spellcheck="false">{ "a": 1, "b": [true, "x"] }</textarea>
+        <div class="hint">
+          PUT wraps this as <code>{"value": ...}</code>. Your API expects an object, not a raw string/number.
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div id="status" class="hint">Ready.</div>
+      <pre id="out">{}</pre>
+    </div>
+
+    <script>
+      const elKey = document.getElementById("key");
+      const elValue = document.getElementById("value");
+      const elOut = document.getElementById("out");
+      const elStatus = document.getElementById("status");
+
+      function setStatus(msg, kind = "hint") {
+        elStatus.className = kind;
+        elStatus.textContent = msg;
+      }
+
+      function pretty(obj) {
+        return JSON.stringify(obj, null, 2);
+      }
+
+      function ensureKey() {
+        const k = (elKey.value || "").trim();
+        if (!k) {
+          setStatus("Key is required.", "err");
+          throw new Error("missing key");
+        }
+        return k;
+      }
+
+      async function readJsonResponse(res) {
+        const text = await res.text();
+        if (!text) return { _empty: true };
+        try { return JSON.parse(text); } catch { return { _raw: text }; }
+      }
+
+      async function doGet() {
+        const k = ensureKey();
+        setStatus(`GET /api/kv/${encodeURIComponent(k)} ...`);
+        const res = await fetch(`/api/kv/${encodeURIComponent(k)}`, { method: "GET" });
+        const data = await readJsonResponse(res);
+        if (!res.ok) {
+          setStatus(`GET failed (${res.status})`, "err");
+          elOut.textContent = pretty(data);
+          return;
+        }
+        setStatus(`GET ok (${res.status})`, "ok");
+        elOut.textContent = pretty(data);
+
+        // Populate textarea with returned value (nice for editing)
+        if (data && typeof data === "object" && data.value !== undefined) {
+          elValue.value = pretty(data.value);
+        }
+      }
+
+      async function doPut() {
+        const k = ensureKey();
+
+        let parsed;
+        try {
+          parsed = JSON.parse(elValue.value);
+        } catch (e) {
+          setStatus(`Invalid JSON in Value textarea: ${e.message}`, "err");
+          return;
+        }
+
+        if (parsed === null || Array.isArray(parsed) || typeof parsed !== "object") {
+          setStatus("Value must be a JSON object (e.g. {\"x\": 1}), not null/array/string/number.", "err");
+          return;
+        }
+
+        setStatus(`PUT /api/kv/${encodeURIComponent(k)} ...`);
+        const res = await fetch(`/api/kv/${encodeURIComponent(k)}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ value: parsed }),
+        });
+
+        const data = await readJsonResponse(res);
+        if (!res.ok) {
+          setStatus(`PUT failed (${res.status})`, "err");
+          elOut.textContent = pretty(data);
+          return;
+        }
+
+        // Your PUT returns no body currently; show something useful.
+        setStatus(`PUT ok (${res.status})`, "ok");
+        elOut.textContent = pretty({ key: k, put: true });
+      }
+
+      async function doDelete() {
+        const k = ensureKey();
+        setStatus(`DELETE /api/kv/${encodeURIComponent(k)} ...`);
+        const res = await fetch(`/api/kv/${encodeURIComponent(k)}`, { method: "DELETE" });
+        const data = await readJsonResponse(res);
+        if (!res.ok) {
+          setStatus(`DELETE failed (${res.status})`, "err");
+          elOut.textContent = pretty(data);
+          return;
+        }
+        setStatus(`DELETE ok (${res.status})`, "ok");
+        elOut.textContent = pretty(data);
+      }
+
+      document.getElementById("btnGet").addEventListener("click", () => doGet().catch(() => {}));
+      document.getElementById("btnPut").addEventListener("click", () => doPut().catch(() => {}));
+      document.getElementById("btnDel").addEventListener("click", () => doDelete().catch(() => {}));
+
+      // Convenience: Ctrl+Enter to PUT
+      elValue.addEventListener("keydown", (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+          doPut().catch(() => {});
+        }
+      });
+    </script>
+  </body>
+</html>

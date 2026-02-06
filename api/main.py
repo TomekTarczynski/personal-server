@@ -53,6 +53,7 @@ def put_kv(key: str, body: KVPut):
             (key, v_json, now)
         )
         con.commit()
+        return {"key": key, "updated_at": now, "upserted": True}
     finally:
         con.close()
 
