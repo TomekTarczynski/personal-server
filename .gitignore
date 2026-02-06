@@ -17,3 +17,5 @@
 # db
 deploy/data/
 *.db
+
+infra/secrets/*
