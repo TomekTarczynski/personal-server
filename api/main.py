@@ -69,6 +69,19 @@ def get_kv(key: str):
     finally:
         con.close()
 
+@app.get("/kv")
+def list_keys():
+    con = connect()
+    try:
+        rows = con.execute("SELECT k, updated_at FROM kv ORDER BY k").fetchall()
+
+        return {
+            "count": len(rows),
+            "items": [{"key": k, "updated_at": updated_at} for (k, updated_at) in rows]
+        }
+    finally:
+        con.close()
+
 @app.delete("/kv/{key}")
 def delete_kv(key: str):
     con = connect()
