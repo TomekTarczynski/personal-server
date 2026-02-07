@@ -41,8 +41,16 @@ resource "null_resource" "deploy" {
     destination = "/tmp/deploy.sh"
   }
 
+  provisioner "file" {
+    source      = var.dropbox_env_path
+    destination = "/tmp/dropbox.env"
+  }
+
   provisioner "remote-exec" {
     inline = [
+      "sudo install -d -m 700 /etc/personal-server",
+      "sudo install -m 600 /tmp/dropbox.env /etc/personal-server/dropbox.env",
+      "rm -f /tmp/dropbox.env",
       "chmod 700 /tmp/deploy.sh",
       "REPO_URL='https://${var.github_repo}' GITHUB_PAT='${var.github_pat}' DEPLOY_DIR='/opt/personal-server' COMPOSE_DIR='/opt/personal-server/deploy' bash /tmp/deploy.sh",
       "rm -rf /tmp/deploy.sh"

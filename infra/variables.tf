@@ -23,3 +23,8 @@ variable "ssh_public_key_path" {
 variable "github_repo" {
   type = string
 }
+
+variable "dropbox_env_path" {
+  type        = string
+  description = "Local path to the dropbox.env"
+}

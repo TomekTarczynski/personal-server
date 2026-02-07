@@ -54,6 +54,7 @@
           <button id="btnPut">PUT</button>
           <button id="btnDel">DELETE</button>
           <button id="btnList">LIST KEYS</button>
+          <button id="btnBackup">BACKUP</button>
         </div>
       </div>
 
@@ -215,10 +216,31 @@
         });
       }
 
+      async function doBackup() {
+        setStatus("POST /api/backup ...");
+
+        const res = await fetch("/api/backup", {
+          method: "POST",
+        });
+
+        const data = await readJsonResponse(res);
+
+        if (!res.ok) {
+          setStatus(`BACKUP failed (${res.status})`, "err");
+          elOut.textContent = pretty(data);
+          return;
+        }
+
+        setStatus("BACKUP ok", "ok");
+        elOut.textContent = pretty(data);
+      }
+
       document.getElementById("btnGet").onclick = () => doGet().catch(() => {});
       document.getElementById("btnPut").onclick = () => doPut().catch(() => {});
       document.getElementById("btnDel").onclick = () => doDelete().catch(() => {});
       document.getElementById("btnList").onclick = () => doList().catch(() => {});
+      document.getElementById("btnBackup").onclick = () => doBackup().catch(() => {});
+
     </script>
   </body>
 </html>

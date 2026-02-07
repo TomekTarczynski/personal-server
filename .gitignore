@@ -19,3 +19,6 @@ deploy/data/
 *.db
 
 infra/secrets/*
+infra/.terraform.lock.hcl
+
+dump.txt

@@ -16,8 +16,10 @@ services:
     environment:
       - PORT=8000
       - DB_PATH=/data/sqlite.db
+      - BACKUP_DIR=/var/backups/personal-server
     volumes:
       - appdata:/data
+      - /etc/personal-server/dropbox.env:/etc/personal-server/dropbox.env:ro      
     expose:
       - "8000"
     restart: unless-stopped
