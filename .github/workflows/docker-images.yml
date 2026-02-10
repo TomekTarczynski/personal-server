@@ -3,7 +3,7 @@ name: Build nad push Docker images
 on:
     push:
         branches: ["main"]
-    workflow_dispach:
+    workflow_dispatch:
 
 permissions:
     contents: read
@@ -52,7 +52,7 @@ jobs:
               uses: docker/build-push-action@v6
               with:
                 context: .
-                file: api/Dockerfile
+                file: nginx/Dockerfile
                 push: true
                 tags: |
                     ${{ steps.names.outputs.NGINX_IMAGE}}:latest
