@@ -5,12 +5,12 @@ variable "admin_ipv4_cidr" {
 
 variable "github_pat" {
   type      = string
-  sensitive = false
+  sensitive = true
 }
 
 variable "ssh_private_key_path" {
   type        = string
-  sensitive   = false
+  sensitive   = true
   description = "Path to private SSH key"
 }
 

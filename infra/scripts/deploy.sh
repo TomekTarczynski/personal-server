@@ -40,7 +40,7 @@ umask 022
 
 # Permanent permission fix for bind-mounted html
 sudo chmod a+X /opt /opt/personal-server /opt/personal-server/deploy /opt/personal-server/deploy/nginx || true
-sudo chmod -R a+rX "$DEPLOY_DIR/deploy/nginx/html" || true
+sudo chmod -R a+rX "$DEPLOY_DIR/web" || true
 
 cd "$COMPOSE_DIR"
 docker compose up -d --build --remove-orphans
