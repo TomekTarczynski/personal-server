@@ -10,8 +10,8 @@ RUN apt-get update \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY main.py .
-COPY scripts/ /opt/scripts/
+COPY api/main.py .
+COPY api/scripts/ /opt/scripts/
 RUN chmod +x /opt/scripts/*.sh
 
 ENV PORT=8000
