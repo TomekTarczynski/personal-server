@@ -7,7 +7,7 @@ RUN apt-get update \
       bash curl ca-certificates sqlite3 \
  && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt .
+COPY api/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY api/main.py .
