@@ -1,25 +1,22 @@
 services:
   nginx:
-    image: nginx:alpine
+    image: ghcr.io/tomektarczynski/personal-server/nginx:latest
     ports:
       - "80:80"
-    volumes:
-      - ../web:/usr/share/nginx/html:ro
-      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
       - api
     restart: unless-stopped
 
   api:
-    build:
-      context: ../api
+    image: ghcr.io/tomektarczynski/personal-server/api:latest
+    env_file:
+      - /etc/personal-server/personal-server.env
     environment:
       - PORT=8000
       - DB_PATH=/data/sqlite.db
       - BACKUP_DIR=/var/backups/personal-server
     volumes:
       - appdata:/data
-      - /etc/personal-server/dropbox.env:/etc/personal-server/dropbox.env:ro      
     expose:
       - "8000"
     restart: unless-stopped

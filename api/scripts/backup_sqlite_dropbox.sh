@@ -2,15 +2,11 @@
 set -euo pipefail
 
 # config
-ENV_FILE="/etc/personal-server/dropbox.env"
 DB_PATH="${DB_PATH:-/data/sqlite.db}"
 BACKUP_DIR="${BACKUP_DIR:-/var/backups/personal-server}"
 TS="$(date -u +%Y-%m-%dT%H-%M-%SZ)"
 ARCHIVE="sqlite-${TS}.db"
-DROPBOX_PATH="/personal-server"
-
-# Load access token to Dropbox
-source "${ENV_FILE}"
+DROPBOX_PATH="${DROPBOX_PATH:-/personal-server}"
 
 mkdir -p "${BACKUP_DIR}"
 
