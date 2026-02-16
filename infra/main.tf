@@ -54,12 +54,16 @@ resource "null_resource" "deploy" {
   provisioner "remote-exec" {
     inline = [
       "sudo install -d -m 700 /etc/personal-server",
+      "sudo install -d -m 755 /opt/personal-server",
+      
       "sudo install -m 600 /tmp/compose.yaml /opt/personal-server/compose.yaml",
       "rm -f /tmp/compose.yaml",
+      
       "sudo install -m 600 /tmp/personal-server.env /etc/personal-server/personal-server.env",
       "rm -f /tmp/personal-server.env",
+      
       "chmod 700 /tmp/deploy.sh",
-      "COMPOSE_FILE='/opt/personal-server/compose.yaml' bash /tmp/deploy.sh",
+      "sudo bash -lc \"COMPOSE_FILE='/opt/personal-server/compose.yaml' bash /tmp/deploy.sh\""
       "rm -rf /tmp/deploy.sh"
     ]
   }
