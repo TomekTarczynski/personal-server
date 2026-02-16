@@ -44,7 +44,7 @@ echo "[2/3] Upload file to dropbox"
 
 RESP="$(mktemp)"
 HTTP_CODE="$(curl -sS -o "$RESP" -w "%{http_code}" -X POST https://content.dropboxapi.com/2/files/upload \
-  --header "Authorization: Bearer ${DROPBOX_TOKEN}" \
+  --header "Authorization: Bearer ${DROPBOX_ACCESS_TOKEN}" \
   --header "Dropbox-API-Arg: {\"path\": \"${DROPBOX_PATH}/${ARCHIVE}\", \"mode\": \"add\"}" \
   --header "Content-Type: application/octet-stream" \
   --data-binary @"${BACKUP_DIR}/${ARCHIVE}")"

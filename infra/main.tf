@@ -63,7 +63,7 @@ resource "null_resource" "deploy" {
       "rm -f /tmp/personal-server.env",
       
       "chmod 700 /tmp/deploy.sh",
-      "sudo bash -lc \"COMPOSE_FILE='/opt/personal-server/compose.yaml' bash /tmp/deploy.sh\""
+      "sudo bash -lc \"COMPOSE_FILE='/opt/personal-server/compose.yaml' bash /tmp/deploy.sh\"",
       "rm -rf /tmp/deploy.sh"
     ]
   }
