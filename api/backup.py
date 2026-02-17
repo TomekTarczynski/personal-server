@@ -39,7 +39,7 @@ def pack_data_folder():
     backup_filename = f"DATA-{ts}.tar.gz"
     backup_path = os.path.join(backup_folder, backup_filename)
 
-    os.makedirs(backup_folder, exists_ok=True)
+    os.makedirs(backup_folder, exist_ok=True)
 
     with tarfile.open(backup_path, "w:gz") as tar:
         tar.add(data_folder, arcname=".")
