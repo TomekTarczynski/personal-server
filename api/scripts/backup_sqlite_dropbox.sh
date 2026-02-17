@@ -54,7 +54,7 @@ if [ "${FILE_SIZE}" -le "${LIMIT}" ]; then
     --header "Authorization: Bearer ${DROPBOX_ACCESS_TOKEN}" \
     --header "Dropbox-API-Arg: {\"path\": \"${DROPBOX_PATH}/${ARCHIVE_BASENAME}\", \"mode\": \"add\"}" \
     --header "Content-Type: application/octet-stream" \
-    --data-binary @"${ARCHIVE_PATH}"
+    --data-binary @"${ARCHIVE_PATH}")"
 
   if [ "$HTTP_CODE" -lt 200 ] || [ "$HTTP_CODE" -ge 300 ]; then
     echo "Dropbox upload failed (HTTP $HTTP_CODE):"
