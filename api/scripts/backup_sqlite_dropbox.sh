@@ -8,35 +8,12 @@ TS="$(date -u +%Y-%m-%dT%H-%M-%SZ)"
 ARCHIVE_BASENAME="DATA-${TS}.tar.gz"
 ARCHIVE_PATH="${BACKUP_DIR}/${ARCHIVE_BASENAME}"
 DROPBOX_PATH="${DROPBOX_PATH:-/personal-server}"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
 mkdir -p "${BACKUP_DIR}"
 
 echo "[0/4] Get short-lived access token via refresh token"
-
-TOKEN_RESP="$(mktemp)"
-TOKEN_HTTP_CODE="$(curl -sS -o "$TOKEN_RESP" -w "%{http_code}" \
-  -u "${DROPBOX_APP_KEY}:${DROPBOX_APP_SECRET}" \
-  -d "grant_type=refresh_token" \
-  -d "refresh_token=${DROPBOX_REFRESH_TOKEN}" \
-  https://api.dropboxapi.com/oauth2/token)"
-
-if [ "$TOKEN_HTTP_CODE" -lt 200 ] || [ "$TOKEN_HTTP_CODE" -ge 300 ]; then
-  echo "Dropbox token refresh failed (HTTP $TOKEN_HTTP_CODE):"
-  cat "$TOKEN_RESP"
-  echo
-  rm -f "$TOKEN_RESP"
-  exit 1
-fi
-
-# Parse access_token (no jq dependency)
-DROPBOX_ACCESS_TOKEN="$(python3 - <<PY
-import json
-with open("${TOKEN_RESP}", "r", encoding="utf-8") as f:
-    print(json.load(f)["access_token"])
-PY
-)"
-rm -f "$TOKEN_RESP"
-
+DROPBOX_ACCESS_TOKEN="$(./dropbox_get_token.sh)"
 
 echo "[1/4] Create archive"
 tar -C "${DATA_ROOT}" \
