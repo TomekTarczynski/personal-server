@@ -13,13 +13,12 @@ services:
       - /etc/personal-server/personal-server.env
     environment:
       - PORT=8000
-      - DB_PATH=/data/sqlite.db
+      - DB_PATH=/DATA/sqlite.db
       - BACKUP_DIR=/var/backups/personal-server
     volumes:
-      - appdata:/data
+      - /opt/personal-server/DATA/api:/DATA
+      - /opt/personal-server/DATA:/DATA_BACKUP:ro
     expose:
       - "8000"
     restart: unless-stopped
 
-volumes:
-  appdata:

@@ -4,7 +4,7 @@ WORKDIR /app
 
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
-      bash curl ca-certificates sqlite3 \
+      bash curl ca-certificates sqlite3 tar gzip \
  && rm -rf /var/lib/apt/lists/*
 
 COPY api/requirements.txt .

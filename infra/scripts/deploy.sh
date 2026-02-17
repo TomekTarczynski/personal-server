@@ -13,5 +13,7 @@ COMPOSE_FILE="${COMPOSE_FILE:-/opt/personal-server/compose.yaml}"
 
 sudo cloud-init status --wait
 
+sudo install -d -m 755 /opt/personal-server/DATA
+
 docker compose -f "$COMPOSE_FILE" pull
 docker compose -f "$COMPOSE_FILE" up -d --remove-orphans
