@@ -13,7 +13,7 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 mkdir -p "${BACKUP_DIR}"
 
 echo "[0/4] Get short-lived access token via refresh token"
-DROPBOX_ACCESS_TOKEN="$(./dropbox_get_token.sh)"
+DROPBOX_ACCESS_TOKEN="$("${SCRIPT_DIR}/dropbox_get_token.sh")"
 
 echo "[1/4] Create archive"
 tar -C "${DATA_ROOT}" \
