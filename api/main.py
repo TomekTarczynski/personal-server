@@ -1,14 +1,14 @@
 import json
 import os
 import sqlite3
-import subprocess
 
 from datetime import datetime, timezone
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
+import backup as b
+
 DB_PATH = os.environ.get("DB_PATH", "/data/sqlite.db")
-BACKUP_SCRIPT = os.environ.get("BACKUP_SCRIPT", "/opt/scripts/backup_sqlite_dropbox.sh")
 
 def connect():
     con = sqlite3.connect(DB_PATH)
@@ -40,35 +40,8 @@ def hello():
 
 @app.post("/backup")
 def backup():
-    if not os.path.exists(BACKUP_SCRIPT):
-        raise HTTPException(status_code=500, detail=f"Backup script not found: {BACKUP_SCRIPT}")
-    
-    try:
-        res = subprocess.run(
-            ["bash", BACKUP_SCRIPT],
-            capture_output=True,
-            text=True,
-            check=False
-        )
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to start backup: {e}")
-    
-    stdout = (res.stdout or "").strip()
-    stderr = (res.stderr or "").strip()
-
-    if res.returncode != 0:
-        raise HTTPException(
-            status_code=500,
-            detail={
-                "message": "Backup failed",
-                "returncode": res.returncode,
-                "stdout": stdout[-4000:],
-                "stderr": stderr[-4000:]
-            }
-        )
-    
-    last_line = stdout.splitlines()[-1] if stdout else ""
-    return {"ok": True, "message": "Backup completed", "log_tail": last_line}
+    dropbox_path = b.backup()
+    return {"ok": True, "message": "Backup completed", "dropbox_path": dropbox_path}
 
 @app.put("/kv/{key}")
 def put_kv(key: str, body: KVPut):

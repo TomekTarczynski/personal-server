@@ -14,7 +14,9 @@ services:
     environment:
       - PORT=8000
       - DB_PATH=/DATA/sqlite.db
-      - BACKUP_DIR=/var/backups/personal-server
+      - BACKUP_FOLDER=/var/backups/personal-server
+      - DATA_FOLDER=/DATA_BACKUP
+      - DROPBOX_FOLDER=/personal-server
     volumes:
       - /opt/personal-server/DATA/api:/DATA
       - /opt/personal-server/DATA:/DATA_BACKUP:ro

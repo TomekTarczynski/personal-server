@@ -11,11 +11,7 @@ COPY api/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY api/main.py .
-
-COPY api/scripts/ /opt/scripts/
-RUN chmod +x /opt/scripts/*.sh
-
-COPY api/backup/ /opt/backup/
+COPY api/backup.py .
 
 ENV PORT=8000
 EXPOSE 8000
