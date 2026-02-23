@@ -14,7 +14,13 @@
         border: 1px solid #ddd;
         border-radius: 8px;
         padding: 24px;
-        max-width: 500px;
+        max-width: 600px;
+      }
+
+      .btns {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
       }
 
       button {
@@ -47,14 +53,18 @@
     <div class="card">
       <h2>Database Backup</h2>
 
-      <button id="btnBackup">Run Backup</button>
+      <div class="btns">
+        <button id="btnBackup">Run Backup</button>
+        <button id="btnList">List Backups</button>
+      </div>
 
       <div id="status" class="status hint">Ready.</div>
       <pre id="output">{}</pre>
     </div>
 
     <script>
-      const btn = document.getElementById("btnBackup");
+      const btnBackup = document.getElementById("btnBackup");
+      const btnList = document.getElementById("btnList");
       const statusEl = document.getElementById("status");
       const outputEl = document.getElementById("output");
 
@@ -95,7 +105,31 @@
         }
       }
 
-      btn.onclick = () => runBackup();
+      async function listBackups() {
+        setStatus("Fetching backup list...");
+
+        try {
+          const res = await fetch("/api/backup/list");
+          const data = await readJsonResponse(res);
+
+          if (!res.ok) {
+            setStatus(`List failed (${res.status})`, "err");
+            outputEl.textContent = JSON.stringify(data, null, 2);
+            return;
+          }
+
+          const count = data.entries ? data.entries.length : 0;
+          setStatus(`Found ${count} backup file(s).`, "ok");
+          outputEl.textContent = JSON.stringify(data, null, 2);
+
+        } catch (err) {
+          setStatus("Network error.", "err");
+          outputEl.textContent = err.toString();
+        }
+      }
+
+      btnBackup.onclick = runBackup;
+      btnList.onclick = listBackups;
     </script>
   </body>
 </html>

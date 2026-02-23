@@ -62,3 +62,20 @@ def backup():
 
     upload_file(backup_path, dropbox_path)
     return {"ok": True, "message": "Backup completed", "dropbox_path": dropbox_path}
+
+@router.get("/list")
+def list_backup_files():
+    dbx = get_client()
+    backup_path = backup_dict["backup_path"]
+    result = dbx.files_list_folder(backup_path)
+
+    return {
+        "entries": [
+            {
+                "name": e.name,
+                "path": e.path_display,
+                "size": getattr(r, "size", None)
+            }
+            for e in result.entries
+        ]
+    }
