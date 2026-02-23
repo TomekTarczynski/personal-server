@@ -1,12 +1,13 @@
-import argparse
 import os
+from pathlib import Path
 import posixpath
 import tarfile
 
 from datetime import datetime
 
 import dropbox
-from fastapi import FastAPI, HTTPException, APIRouter
+from fastapi import APIRouter
+from pydantic import BaseModel
 
 router = APIRouter(prefix="/backup", tags=["backup"])
 
@@ -79,3 +80,17 @@ def list_backup_files():
             for e in result.entries
         ]
     }
+
+class DownloadRequest(BaseModel):
+    dropbox_path: str
+    local_path: str
+
+@router.post("/download")
+def download_file(req: DownloadRequest) -> dict:
+    dbx = get_client()
+
+    local_path = Path(req.local_path)
+
+    dbx.files_download_to_file(download_path=str(local_path), path=req.dropbox_path)
+
+    return {"ok": True, "dropbox_path": req.dropbox_path, "local_path": str(local_path)}

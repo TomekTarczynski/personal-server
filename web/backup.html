@@ -14,13 +14,14 @@
         border: 1px solid #ddd;
         border-radius: 8px;
         padding: 24px;
-        max-width: 600px;
+        max-width: 760px;
       }
 
       .btns {
         display: flex;
         gap: 12px;
         flex-wrap: wrap;
+        align-items: center;
       }
 
       button {
@@ -46,6 +47,55 @@
         border-radius: 6px;
         overflow: auto;
       }
+
+      .section {
+        margin-top: 18px;
+        padding-top: 16px;
+        border-top: 1px solid #eee;
+      }
+
+      .list {
+        margin: 10px 0 0 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .item {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 12px;
+        border: 1px solid #eee;
+        border-radius: 8px;
+        margin-bottom: 10px;
+      }
+
+      .meta {
+        min-width: 0;
+      }
+
+      .name {
+        font-weight: 650;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 520px;
+      }
+
+      .path {
+        font-size: 13px;
+        color: #555;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 520px;
+      }
+
+      .smallbtn {
+        padding: 10px 14px;
+        font-size: 14px;
+      }
     </style>
   </head>
 
@@ -59,6 +109,12 @@
       </div>
 
       <div id="status" class="status hint">Ready.</div>
+
+      <div class="section">
+        <h3 style="margin: 0 0 8px 0;">Backups</h3>
+        <ul id="backupList" class="list"></ul>
+      </div>
+
       <pre id="output">{}</pre>
     </div>
 
@@ -67,6 +123,7 @@
       const btnList = document.getElementById("btnList");
       const statusEl = document.getElementById("status");
       const outputEl = document.getElementById("output");
+      const backupListEl = document.getElementById("backupList");
 
       function setStatus(message, type = "hint") {
         statusEl.className = "status " + type;
@@ -80,14 +137,73 @@
         catch { return { _raw: text }; }
       }
 
+      function basename(p) {
+        if (!p) return "file";
+        const s = String(p);
+        const idx = s.lastIndexOf("/");
+        return idx >= 0 ? s.slice(idx + 1) : s;
+      }
+
+      function pickPath(entry) {
+        // Dropbox list usually provides: name, path_display, path_lower
+        return entry?.path_display || entry?.path_lower || entry?.path || entry?.id || "";
+      }
+
+      function clearList() {
+        backupListEl.innerHTML = "";
+      }
+
+      function renderList(entries) {
+        clearList();
+
+        if (!entries || entries.length === 0) {
+          const li = document.createElement("li");
+          li.className = "item";
+          li.textContent = "No backups found.";
+          backupListEl.appendChild(li);
+          return;
+        }
+
+        for (const entry of entries) {
+          const path = pickPath(entry);
+          const name = entry?.name || basename(path);
+
+          const li = document.createElement("li");
+          li.className = "item";
+
+          const meta = document.createElement("div");
+          meta.className = "meta";
+
+          const nameEl = document.createElement("div");
+          nameEl.className = "name";
+          nameEl.title = name;
+          nameEl.textContent = name;
+
+          const pathEl = document.createElement("div");
+          pathEl.className = "path";
+          pathEl.title = path;
+          pathEl.textContent = path;
+
+          meta.appendChild(nameEl);
+          meta.appendChild(pathEl);
+
+          const btn = document.createElement("button");
+          btn.className = "smallbtn";
+          btn.textContent = "Download";
+          btn.onclick = () => downloadBackup(path, name);
+
+          li.appendChild(meta);
+          li.appendChild(btn);
+
+          backupListEl.appendChild(li);
+        }
+      }
+
       async function runBackup() {
         setStatus("Running backup...");
 
         try {
-          const res = await fetch("/api/backup/backup", {
-            method: "POST"
-          });
-
+          const res = await fetch("/api/backup/backup", { method: "POST" });
           const data = await readJsonResponse(res);
 
           if (!res.ok) {
@@ -115,11 +231,51 @@
           if (!res.ok) {
             setStatus(`List failed (${res.status})`, "err");
             outputEl.textContent = JSON.stringify(data, null, 2);
+            clearList();
             return;
           }
 
-          const count = data.entries ? data.entries.length : 0;
-          setStatus(`Found ${count} backup file(s).`, "ok");
+          const entries = Array.isArray(data.entries) ? data.entries : [];
+          setStatus(`Found ${entries.length} backup file(s).`, "ok");
+
+          // show raw response in the output pane
+          outputEl.textContent = JSON.stringify(data, null, 2);
+
+          // render UI list
+          renderList(entries);
+
+        } catch (err) {
+          setStatus("Network error.", "err");
+          outputEl.textContent = err.toString();
+          clearList();
+        }
+      }
+
+      async function downloadBackup(dropboxPath, filename) {
+        setStatus(`Downloading ${filename}...`);
+
+        // Request server-side download destination
+        const localPath = `/tmp/${filename}`;
+
+        try {
+          const res = await fetch("/api/backup/download", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              dropbox_path: dropboxPath,
+              local_path: localPath
+            })
+          });
+
+          const data = await readJsonResponse(res);
+
+          if (!res.ok) {
+            setStatus(`Download failed (${res.status})`, "err");
+            outputEl.textContent = JSON.stringify(data, null, 2);
+            return;
+          }
+
+          setStatus(`Downloaded to ${localPath}`, "ok");
           outputEl.textContent = JSON.stringify(data, null, 2);
 
         } catch (err) {
@@ -130,6 +286,9 @@
 
       btnBackup.onclick = runBackup;
       btnList.onclick = listBackups;
+
+      // Optional: auto-load list on page open
+      // listBackups();
     </script>
   </body>
 </html>
