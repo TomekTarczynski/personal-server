@@ -219,7 +219,7 @@
       async function doBackup() {
         setStatus("POST /api/backup ...");
 
-        const res = await fetch("/api/backup", {
+        const res = await fetch("/api/backup/backup", {
           method: "POST",
         });
 

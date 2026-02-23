@@ -52,7 +52,7 @@ def pack_data_folder():
 
     return {"backup_path": backup_path, "backup_filename": backup_filename}
 
-@router.post("/")
+@router.post("/backup")
 def backup():
     backup_dict = pack_data_folder()
     backup_path = backup_dict["backup_path"]
