@@ -51,6 +51,11 @@ resource "null_resource" "deploy" {
     destination = "/tmp/compose.yaml"
   }
 
+  provisioner "file" {
+    source      = "${path.module}/../deploy/restart.sh"
+    destination = "/tmp/restart.sh"
+  }
+
   provisioner "remote-exec" {
     inline = [
       "sudo install -d -m 700 /etc/personal-server",
@@ -58,6 +63,9 @@ resource "null_resource" "deploy" {
       
       "sudo install -m 600 /tmp/compose.yaml /opt/personal-server/compose.yaml",
       "rm -f /tmp/compose.yaml",
+
+      "sudo install -m 700 /tmp/restart.sh /opt/personal-server/restart.sh",
+      "rm -f /tmp/restart.sh",      
       
       "sudo install -m 600 /tmp/personal-server.env /etc/personal-server/personal-server.env",
       "rm -f /tmp/personal-server.env",

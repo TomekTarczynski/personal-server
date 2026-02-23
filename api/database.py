@@ -60,7 +60,7 @@ def get_kv(key: str):
     finally:
         con.close()
 
-@router.get("/")
+@router.get("")
 def list_keys():
     con = connect()
     try:
