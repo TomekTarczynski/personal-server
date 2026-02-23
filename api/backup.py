@@ -6,8 +6,14 @@ import tarfile
 from datetime import datetime
 
 import dropbox
+from fastapi import FastAPI, HTTPException, APIRouter
+
+router = APIRouter(prefix="/backup", tags=["backup"])
 
 MAX_SIMPLE_UPLOAD = 150 * 1024 * 1024
+
+async def startup() -> None:
+    pass
 
 def get_client() -> dropbox.Dropbox:
     return dropbox.Dropbox(
@@ -46,7 +52,8 @@ def pack_data_folder():
 
     return {"backup_path": backup_path, "backup_filename": backup_filename}
 
-def backup() -> str:
+@router.post("/")
+def backup():
     backup_dict = pack_data_folder()
     backup_path = backup_dict["backup_path"]
     backup_filename = backup_dict["backup_filename"]
@@ -54,4 +61,4 @@ def backup() -> str:
     dropbox_path = posixpath.join(dropbox_folder, backup_filename)
 
     upload_file(backup_path, dropbox_path)
-    return dropbox_path
+    return {"ok": True, "message": "Backup completed", "dropbox_path": dropbox_path}

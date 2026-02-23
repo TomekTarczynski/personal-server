@@ -12,6 +12,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY api/main.py .
 COPY api/backup.py .
+COPY api/database.py .
 
 ENV PORT=8000
 EXPOSE 8000
