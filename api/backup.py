@@ -66,8 +66,8 @@ def backup():
 @router.get("/list")
 def list_backup_files():
     dbx = get_client()
-    backup_folder = os.environ["BACKUP_FOLDER"]
-    result = dbx.files_list_folder(backup_folder)
+    dropbox_folder= os.environ["DROPBOX_FOLDER"]
+    result = dbx.files_list_folder(dropbox_folder)
 
     return {
         "entries": [
