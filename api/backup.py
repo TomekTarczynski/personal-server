@@ -74,7 +74,7 @@ def list_backup_files():
             {
                 "name": e.name,
                 "path": e.path_display,
-                "size": getattr(r, "size", None)
+                "size": getattr(e, "size", None)
             }
             for e in result.entries
         ]
