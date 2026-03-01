@@ -3,6 +3,7 @@ import os
 import sqlite3
 import asyncio
 
+from pathlib import Path
 from datetime import datetime, timezone
 from fastapi import FastAPI, HTTPException, APIRouter
 from pydantic import BaseModel
@@ -15,6 +16,7 @@ class KVPut(BaseModel):
     value: dict
 
 def connect():
+    Path(DB_PATH).parent.mkdir(parents=True, exist_ok=True)
     con = sqlite3.connect(DB_PATH)
     return con
 
