@@ -96,6 +96,10 @@
         padding: 10px 14px;
         font-size: 14px;
       }
+
+      .item .btns {
+        gap: 8px;
+      }
     </style>
   </head>
 
@@ -187,13 +191,24 @@
           meta.appendChild(nameEl);
           meta.appendChild(pathEl);
 
-          const btn = document.createElement("button");
-          btn.className = "smallbtn";
-          btn.textContent = "Download";
-          btn.onclick = () => downloadBackup(path, name);
+          const actions = document.createElement("div");
+          actions.className = "btns";
+
+          const btnDownload = document.createElement("button");
+          btnDownload.className = "smallbtn";
+          btnDownload.textContent = "Download";
+          btnDownload.onclick = () => downloadBackup(path, name);
+
+          const btnRestore = document.createElement("button");
+          btnRestore.className = "smallbtn";
+          btnRestore.textContent = "Restore";
+          btnRestore.onclick = () => downloadAndRestoreBackup(path, name);
+
+          actions.appendChild(btnDownload);
+          actions.appendChild(btnRestore);
 
           li.appendChild(meta);
-          li.appendChild(btn);
+          li.appendChild(actions);
 
           backupListEl.appendChild(li);
         }
@@ -283,6 +298,63 @@
           outputEl.textContent = err.toString();
         }
       }
+
+      async function downloadAndRestoreBackup(dropboxPath, filename) {
+        const localPath = `/tmp/${filename}`;
+
+        setStatus(`Downloading ${filename}...`);
+
+        try {
+          // 1) download
+          const resDl = await fetch("/api/backup/download", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              dropbox_path: dropboxPath,
+              local_path: localPath
+            })
+          });
+
+          const dataDl = await readJsonResponse(resDl);
+
+          if (!resDl.ok) {
+            setStatus(`Download failed (${resDl.status})`, "err");
+            outputEl.textContent = JSON.stringify(dataDl, null, 2);
+            return;
+          }
+
+          // 2) restore
+          setStatus(`Restoring from ${localPath}...`);
+
+          const resRs = await fetch("/api/backup/restore", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ local_path: localPath })
+          });
+
+          const dataRs = await readJsonResponse(resRs);
+
+          if (!resRs.ok) {
+            setStatus(`Restore failed (${resRs.status})`, "err");
+            outputEl.textContent = JSON.stringify(
+              { download: dataDl, restore: dataRs },
+              null,
+              2
+            );
+            return;
+          }
+
+          setStatus(`Restore completed from ${filename}.`, "ok");
+          outputEl.textContent = JSON.stringify(
+            { download: dataDl, restore: dataRs },
+            null,
+            2
+          );
+        } catch (err) {
+          setStatus("Network error.", "err");
+          outputEl.textContent = err.toString();
+        }
+      }      
 
       btnBackup.onclick = runBackup;
       btnList.onclick = listBackups;
